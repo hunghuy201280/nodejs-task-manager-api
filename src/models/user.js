@@ -10,6 +10,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      validate(value) {
+        const removedSpace = value.split(" ").join("");
+        console.log(removedSpace);
+        return validator.isAlpha(removedSpace);
+      },
     },
     password: {
       type: String,
@@ -20,6 +25,8 @@ const userSchema = new mongoose.Schema(
         if (value.toLowerCase().includes("password")) {
           throw new Error("Password must not contain 'password'");
         }
+        if (value.trim().includes(" "))
+          throw new Error("Password must not contain space");
       },
     },
     age: {
@@ -52,7 +59,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
     avatar: {
-      type: Buffer,
+      type: String,
     },
   },
   {
@@ -67,7 +74,6 @@ userSchema.virtual("tasks", {
 userSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.password;
-  delete userObject.avatar;
   userObject.tokens = undefined;
   return userObject;
 };

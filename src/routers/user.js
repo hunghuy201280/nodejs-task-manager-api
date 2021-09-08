@@ -12,10 +12,9 @@ const {
 router.post("/users", async (req, res) => {
   const user = new User(req.body);
   try {
-    const result = await user.save();
     sendWelcomeEmail(user);
     const token = await user.getToken();
-    res.status(201).send({ result, token });
+    res.status(201).send({ user, token });
   } catch (err) {
     console.log(err);
     res.status(400).send(err);
@@ -81,7 +80,9 @@ router.patch("/users/me", auth, async (req, res) => {
 
   try {
     const user = req.user;
-    updates.forEach((field) => (user[field] = req.body[field]));
+    updates.forEach((field) => {
+      if (req.body[field] != null) user[field] = req.body[field];
+    });
 
     const result = await user.save();
 
@@ -156,11 +157,25 @@ router.get("/users/:id/avatar", async (req, res) => {
     if (!user || !user.avatar) {
       throw new Error();
     }
-    res.set("Content-Type", "image/png");
     res.send(user.avatar);
   } catch (error) {
     console.log(error);
     res.status(404).send();
+  }
+});
+
+router.post("/users/reauthenticate", auth, async (req, res) => {
+  try {
+    if (req.user.email != req.body.email)
+      throw new Error("Re authenticate failed");
+    const user = await User.findByCredentials(
+      req.body.email,
+      req.body.password
+    );
+    res.send();
+  } catch (err) {
+    console.log(err);
+    res.status(400).send(err);
   }
 });
 module.exports = router;

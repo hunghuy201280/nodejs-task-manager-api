@@ -16,7 +16,7 @@ router.post("/tasks", auth, async (req, res) => {
 });
 
 //GET /tasks?completed=false
-//GET /tasks?limit=10&&skip=2
+//GET /tasks?limit=10&skip=2
 //GET /tasks?sortBy=createdAt:desc
 router.get("/tasks", auth, async (req, res) => {
   const match = {};
@@ -99,7 +99,7 @@ router.delete("/tasks/:id", auth, async (req, res) => {
     if (!deletedTask) return res.status(404).send({ error: "Task not found" });
     res.send(deletedTask);
   } catch (err) {
-    res.status(500).send();
+    res.status(404).send();
   }
 });
 module.exports = router;
