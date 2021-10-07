@@ -3,17 +3,45 @@ const Task = require("../models/task");
 const utils = require("../utils");
 const auth = require("../middleware/auth");
 const router = express.Router();
-
-router.post("/tasks", auth, async (req, res) => {
-  const task = new Task({ ...req.body, owner: req.user._id });
-
-  try {
-    const result = await task.save();
-    res.status(201).send(result);
-  } catch (err) {
-    res.status(400).send(err);
-  }
+const multer = require("multer");
+const saveImages = require("../middleware/save_images");
+const upload = multer({
+  limits: {
+    fileSize: 1000000,
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      cb(new Error("Please upload an image"));
+    }
+    cb(null, true);
+  },
 });
+
+router.post(
+  "/tasks",
+  auth,
+  upload.array("images", 4),
+  saveImages,
+  async (req, res) => {
+    try {
+      const reqJson = JSON.parse(req.body.request);
+      const task = new Task({
+        description: reqJson.description,
+        completed: reqJson.completed,
+        owner: req.user._id,
+        images: req.taskImages,
+      });
+      const result = await task.save();
+      res.status(201).send(result);
+    } catch (err) {
+      res.status(400).send(err);
+      console.log(err);
+    }
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
 
 //GET /tasks?completed=false
 //GET /tasks?limit=10&skip=2

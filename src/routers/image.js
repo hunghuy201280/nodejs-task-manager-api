@@ -54,7 +54,9 @@ router.get("/images/:id", async (req, res) => {
     res.set("Content-Type", "image/png");
     res.send(image.data);
   } catch (error) {
-    res.status(404).send({ error });
+    console.log(error);
+    res.status(404).send({ error: error.toString() });
   }
 });
+
 module.exports = router;

@@ -10,4 +10,8 @@ app.use(userRouter);
 app.use(taskRouter);
 app.use(imageRouter);
 
+app.get("/", (req, res) => {
+  res.send(req.headers.host);
+});
+
 module.exports = app;

@@ -16,6 +16,12 @@ const taskSchema = mongoose.Schema(
       required: true,
       ref: "User",
     },
+    images: [
+      {
+        type: String,
+        required: true,
+      },
+    ],
   },
   {
     timestamps: true,
